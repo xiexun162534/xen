@@ -26,7 +26,6 @@
 #include <xen/kexec.h>
 #include <xen/ctype.h>
 #include <xen/warning.h>
-#include <asm/debugger.h>
 #include <asm/div64.h>
 #include <xen/hypercall.h> /* for do_console_io */
 #include <xen/early_printk.h>
@@ -35,6 +34,7 @@
 #include <asm/setup.h>
 
 #ifdef CONFIG_X86
+#include <asm/debugger.h>
 #include <xen/consoled.h>
 #include <asm/guest.h>
 #endif
@@ -1270,7 +1270,9 @@ void panic(const char *fmt, ...)
 
     spin_unlock_irqrestore(&lock, flags);
 
+#ifdef CONFIG_X86
     debugger_trap_immediate();
+#endif
 
     kexec_crash(CRASHREASON_PANIC);
 
