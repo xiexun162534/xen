@@ -22,6 +22,7 @@
 
 #include <xen/lib.h>
 #include <xen/init.h>
+#include <asm/early_printk.h>
 #include <asm/sbi.h>
 #include <asm/atomic.h>
 #include <public/version.h>
@@ -55,10 +56,7 @@ void arch_get_xen_caps(xen_capabilities_info_t *info)
  */
 void __init start_xen(paddr_t fdt_paddr, paddr_t boot_phys_offset)
 {
-    sbi_console_putchar('X');
-    sbi_console_putchar('e');
-    sbi_console_putchar('n');
-    sbi_console_putchar('\n');
+    early_printk("xen start\n");
 }
 /*
  * Local variables:
