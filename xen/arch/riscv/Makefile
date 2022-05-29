@@ -17,9 +17,9 @@ obj-y   += traps.o
 obj-y   += time.o
 obj-y   += vm_event.o
 
-#obj-bin-y += ....o
+obj-y	+= $(TARGET_SUBARCH)/
 
-obj-y	+= head.o
+#obj-bin-y += ....o
 
 $(TARGET): $(TARGET)-syms
 	$(OBJCOPY) -O binary -S $< $@
