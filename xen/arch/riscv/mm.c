@@ -51,7 +51,6 @@
 #include <xen/sizes.h>
 #include <asm/setup.h>
 #include <xen/libfdt/libfdt.h>
-#include <xen/bootfdt.h>
 
 #define XEN_TABLE_MAP_FAILED 0
 #define XEN_TABLE_SUPER_PAGE 1
@@ -92,21 +91,8 @@ static pte_t xen_first_pagetable[PAGE_ENTRIES]
     __attribute__((__aligned__(4096)));
 static pte_t xen_zeroeth_pagetable[PAGE_ENTRIES]
     __attribute__((__aligned__(4096)));
-static pte_t xen_heap_megapages[PAGE_ENTRIES]
-    __attribute__((__aligned__(4096)));
 
 static pte_t xen_fixmap[PAGE_ENTRIES] __attribute__((__aligned__(4096)));
-
-
-/*
- * The second level slot which points to xen_heap_megapages.
- * This slot indexes into the PTE that points to the first level table
- * of megapages that we used to map in and then initialize our first
- * set of boot pages.  Once it has been used to map/init boot page,
- * those pages can be used to alloc the rest of the page tables with
- * the alloc_boot_pages().
- */
-static __initdata int xen_second_heap_slot = -1;
 
 #define THIS_CPU_PGTABLE xen_second_pagetable
 
@@ -525,90 +511,6 @@ static inline pte_t pte_of_xenaddr(vaddr_t va)
     return mfn_to_xen_entry(maddr_to_mfn(ma));
 }
 
-/* Creates megapages of 2MB size based on sv39 spec */
-void __init setup_xenheap_mappings(unsigned long base_mfn,
-                                   unsigned long nr_mfns)
-{
-    unsigned long mfn, end_mfn;
-    vaddr_t vaddr;
-    pte_t *first, pte;
-
-    /* Only use one second level page table before boot allocator available. */
-    BUG_ON(xen_second_heap_slot == -1
-           && (base_mfn >> (SECOND_SHIFT - PAGE_SHIFT))
-              < ((base_mfn + nr_mfns - 1) >> (SECOND_SHIFT - PAGE_SHIFT)));
-
-    /* Align to previous 2MB boundary */
-    mfn = base_mfn & ~((FIRST_SIZE >> PAGE_SHIFT) - 1);
-
-    /* First call sets the xenheap physical and virtual offset. */
-    if ( mfn_eq(xenheap_mfn_start, INVALID_MFN) )
-    {
-        xenheap_mfn_start = _mfn(base_mfn);
-        xenheap_base_pdx = mfn_to_pdx(_mfn(base_mfn));
-        xenheap_virt_start =
-            DIRECTMAP_VIRT_START + (base_mfn - mfn) * PAGE_SIZE;
-    }
-
-    if ( base_mfn < mfn_x(xenheap_mfn_start) )
-        panic("cannot add xenheap mapping at %lx below heap start %lx\n",
-              base_mfn, mfn_x(xenheap_mfn_start));
-
-    end_mfn = base_mfn + nr_mfns;
-
-    /*
-     * Virtual address aligned to previous 2MB to match physical
-     * address alignment done above.
-     */
-    vaddr = (vaddr_t)__mfn_to_virt(base_mfn) & (SECOND_MASK | FIRST_MASK);
-
-    while ( mfn < end_mfn )
-    {
-        unsigned long slot = pagetable_second_index(vaddr);
-        pte_t *p = &xen_second_pagetable[slot];
-
-        if ( pte_is_valid(p) )
-        {
-            /* mfn_to_virt is not valid on the xen_heap_megapages mfn, since it
-             * is not within the xenheap. */
-            first = (slot == xen_second_heap_slot)
-                        ? xen_heap_megapages
-                        : mfn_to_virt(pte_get_mfn(*p));
-        }
-        else if ( xen_second_heap_slot == -1 )
-        {
-            /* Use xen_heap_megapages to bootstrap the mappings */
-            first = xen_heap_megapages;
-            pte = pte_of_xenaddr((vaddr_t)xen_heap_megapages);
-            pte.pte |= PTE_TABLE;
-            write_pte(p, pte);
-            xen_second_heap_slot = slot;
-        }
-        else
-        {
-            mfn_t first_mfn = alloc_boot_pages(1, 1);
-            clear_page(mfn_to_virt(first_mfn));
-            pte = mfn_to_xen_entry(first_mfn);
-            pte.pte |= PTE_TABLE;
-            write_pte(p, pte);
-            first = mfn_to_virt(first_mfn);
-        }
-
-        pte = mfn_to_xen_entry(_mfn(mfn));
-        pte.pte |= PTE_LEAF_DEFAULT;
-        write_pte(&first[pagetable_first_index(vaddr)], pte);
-
-        /*
-         * We are mapping pages at the 2MB first-level granularity, so increment
-         * by FIRST_SIZE.
-         */
-        mfn += FIRST_SIZE >> PAGE_SHIFT;
-        vaddr += FIRST_SIZE;
-    }
-
-    asm volatile("sfence.vma");
-}
-
 #define resolve_early_addr(x) \
     ({                                                                          \
          unsigned long * __##x;                                                 \
@@ -618,52 +520,6 @@ void __init setup_xenheap_mappings(unsigned long base_mfn,
             __##x = (unsigned long *)(x + load_addr_start - linker_addr_start); \
         __##x;                                                                  \
      })
-
-void * __init early_fdt_map(paddr_t fdt_paddr)
-{
-    /* We are using 2MB superpage for mapping the FDT */
-    paddr_t base_paddr = fdt_paddr & (SECOND_MASK | FIRST_MASK);
-    paddr_t offset;
-    void *fdt_virt;
-    uint32_t size;
-
-    /*
-     * Check whether the physical FDT address is set and meets the minimum
-     * alignment requirement. Since we are relying on MIN_FDT_ALIGN to be at
-     * least 8 bytes so that we always access the magic and size fields
-     * of the FDT header after mapping the first chunk, double check if
-     * that is indeed the case.
-     */
-    BUILD_BUG_ON(MIN_FDT_ALIGN < 8);
-    if ( !fdt_paddr || fdt_paddr % MIN_FDT_ALIGN )
-        return NULL;
-
-    /* The FDT is mapped using 2MB superpage */
-    BUILD_BUG_ON(BOOT_FDT_VIRT_START % SZ_2M);
-
-    setup_megapages(xen_first_pagetable, BOOT_FDT_VIRT_START, base_paddr,
-                    SZ_2M >> PAGE_SHIFT);
-
-    offset = fdt_paddr % FIRST_SIZE;
-    fdt_virt = (void *)BOOT_FDT_VIRT_START + offset;
-
-    if ( fdt_magic(fdt_virt) != FDT_MAGIC )
-        return NULL;
-
-    size = fdt_totalsize(fdt_virt);
-    if ( size > MAX_FDT_SIZE )
-        return NULL;
-
-    if ( (offset + size) > SZ_2M )
-    {
-        setup_megapages(xen_first_pagetable, BOOT_FDT_VIRT_START + SZ_2M,
-                        base_paddr + SZ_2M, SZ_2M >> PAGE_SHIFT);
-    }
-
-    asm volatile("sfence.vma");
-
-    return fdt_virt;
-}
 
 void __init clear_pagetables(unsigned long load_addr_start,
                              unsigned long load_addr_end,

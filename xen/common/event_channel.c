@@ -1358,7 +1358,7 @@ int alloc_unbound_xen_event_channel(
     xen_event_channel_notification_t notification_fn)
 {
     struct evtchn *chn;
-    int            port = -1, rc;
+    int            port, rc;
 
     spin_lock(&ld->event_lock);
 
