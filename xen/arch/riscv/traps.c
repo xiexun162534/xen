@@ -31,7 +31,6 @@
 #include <xen/version.h>
 #include <xen/virtual_region.h>
 
-#include <asm/sbi.h>
 #include <asm/traps.h>
 #include <asm/guest_access.h>
 

@@ -25,7 +25,6 @@
 #include <asm/acpi.h>
 #include <asm/system.h>
 #include <asm/time.h>
-#include <asm/sbi.h>
 
 unsigned long __read_mostly cpu_khz;  /* CPU clock frequency in kHz. */
 

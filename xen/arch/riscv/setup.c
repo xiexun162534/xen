@@ -22,7 +22,6 @@
 
 #include <xen/lib.h>
 #include <xen/init.h>
-#include <asm/sbi.h>
 #include <asm/atomic.h>
 #include <public/version.h>
 
