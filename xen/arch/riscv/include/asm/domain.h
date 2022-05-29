@@ -32,11 +32,6 @@ enum domain_type {
 /* The hardware domain has always its memory direct mapped. */
 #define is_domain_direct_mapped(d) ((d) == hardware_domain)
 
-struct vtimer {
-        struct vcpu *v;
-        struct timer timer;
-};
-
 struct arch_domain
 {
     /* Virtual MMU */
@@ -48,62 +43,7 @@ struct arch_domain
 
 struct arch_vcpu
 {
-    /* Callee-saved registers and tp, gp, ra */
-    struct
-    {
-        register_t s0;
-        register_t s1;
-        register_t s2;
-        register_t s3;
-        register_t s4;
-        register_t s5;
-        register_t s6;
-        register_t s7;
-        register_t s8;
-        register_t s9;
-        register_t s10;
-        register_t s11;
-
-        register_t sp;
-        register_t gp;
-
-        /* ra is used to jump to guest when creating new vcpu */
-        register_t ra;
-    } saved_context;
-
-    struct cpu_info *cpu_info;
-    void *stack;
-    struct vtimer vtimer;
-    bool vtimer_initialized;
-
-    /* CSRs */
-    register_t hstatus;
-    register_t hedeleg;
-    register_t hideleg;
-    register_t hvip;
-    register_t hip;
-    register_t hie;
-    register_t hgeie;
-    register_t henvcfg;
-    register_t hcounteren;
-    register_t htimedelta;
-    register_t htval;
-    register_t htinst;
-    register_t hgatp;
-#ifdef CONFIG_32BIT
-    register_t henvcfgh;
-    register_t htimedeltah;
-#endif
-    /* VCSRs */
-    register_t vsstatus;
-    register_t vsip;
-    register_t vsie;
-    register_t vstvec;
-    register_t vsscratch;
-    register_t vscause;
-    register_t vstval;
-    register_t vsatp;
-
+    /* TODO */
 }  __cacheline_aligned;
 
 struct arch_vcpu_io {
@@ -126,26 +66,6 @@ static inline void free_vcpu_guest_context(struct vcpu_guest_context *vgc)
 static inline void arch_vcpu_block(struct vcpu *v) {}
 
 #endif /* !__ASSEMBLY__ */
-
-#define VCPU_SAVED_CONTEXT_s0               0
-#define VCPU_SAVED_CONTEXT_s1               1
-#define VCPU_SAVED_CONTEXT_s2               2
-#define VCPU_SAVED_CONTEXT_s3               3
-#define VCPU_SAVED_CONTEXT_s4               4
-#define VCPU_SAVED_CONTEXT_s5               5
-#define VCPU_SAVED_CONTEXT_s6               6
-#define VCPU_SAVED_CONTEXT_s7               7
-#define VCPU_SAVED_CONTEXT_s8               8
-#define VCPU_SAVED_CONTEXT_s9               9
-#define VCPU_SAVED_CONTEXT_s10              10
-#define VCPU_SAVED_CONTEXT_s11              11
-#define VCPU_SAVED_CONTEXT_sp               12
-#define VCPU_SAVED_CONTEXT_gp               13
-#define VCPU_SAVED_CONTEXT_ra               14
-#define VCPU_SAVED_CONTEXT_last             15
-#define VCPU_SAVED_CONTEXT_OFFSET(x)	\
-    (VCPU_arch_saved_context + ((VCPU_SAVED_CONTEXT_##x) * __SIZEOF_POINTER__))
-#define VCPU_SAVED_CONTEXT_SIZE		    VCPU_SAVED_CONTEXT_OFFSET(last)
 
 #endif /* __ASM_DOMAIN_H__ */
 

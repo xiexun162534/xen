@@ -35,7 +35,5 @@ void asm_offsets(void)
 
    BLANK();
    OFFSET(INITINFO_stack, struct init_info, stack);
-   OFFSET(VCPU_arch_saved_context, struct vcpu, arch.saved_context);
-   DEFINE(CPUINFO_sizeof, sizeof(struct cpu_info));
    DEFINE(PCPUINFO_sizeof, sizeof(struct pcpu_info));
 }
