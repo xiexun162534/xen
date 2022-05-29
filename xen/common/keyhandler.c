@@ -23,10 +23,6 @@
 #include <xen/init.h>
 #include <asm/div64.h>
 
-#ifdef CONFIG_X86
-#include <asm/debugger.h>
-#endif
-
 static unsigned char keypress_key;
 static bool_t alt_key_handling;
 
@@ -507,9 +503,7 @@ static void cf_check run_all_keyhandlers(
 
 static void cf_check do_debugger_trap_fatal(struct cpu_user_regs *regs)
 {
-#ifdef CONFIG_x86
     (void)debugger_trap_fatal(0xf001, regs);
-#endif
 
     /* Prevent tail call optimisation, which confuses xendbg. */
     barrier();
