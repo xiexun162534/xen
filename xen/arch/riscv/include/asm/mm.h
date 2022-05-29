@@ -3,7 +3,6 @@
 
 #include <xen/kernel.h>
 #include <asm/page.h>
-#include <asm/pgtable-bits.h>
 #include <public/xen.h>
 #include <xen/pdx.h>
 #include <xen/errno.h>
