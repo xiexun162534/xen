@@ -29,50 +29,8 @@
 
 unsigned long __read_mostly cpu_khz;  /* CPU clock frequency in kHz. */
 
-uint32_t __read_mostly timer_dt_clock_frequency;
-
 uint64_t __read_mostly boot_count;
 
-/* Set up the timer on the boot CPU (early init function) */
-static void __init preinit_dt_xen_time(void)
-{
-    static const struct dt_device_match dt_cpus[] __initconst =
-    {
-        DT_MATCH_PATH("/cpus"),
-        { /* sentinel */ },
-    };
-    int res;
-    u32 rate;
-    struct dt_device_node *cpus_node;
-
-    cpus_node = dt_find_matching_node(NULL, dt_cpus);
-    if ( !cpus_node )
-        panic("No cpus node in device tree.\n");
-
-    res = dt_property_read_u32(cpus_node, "timebase-frequency", &rate);
-    if ( !res )
-        panic("Unable to find clock frequency.\n");
-    cpu_khz = rate / 1000;
-    timer_dt_clock_frequency = rate;
-}
-
-void __init preinit_xen_time(void)
-{
-    if ( acpi_disabled )
-        preinit_dt_xen_time();
-    else
-        panic("TODO ACPI\n");
-
-    boot_count = get_cycles();
-}
-
-/* Set up the timer on the boot CPU (late init function) */
-int __init init_xen_time(void)
-{
-
-    /* TODO */
-    return 0;
-}
 
 s_time_t get_s_time(void)
 {
@@ -84,7 +42,7 @@ s_time_t get_s_time(void)
 /* VCPU PV timers. */
 void send_timer_event(struct vcpu *v)
 {
-    v->arch.hvip |= MIP_VSTIP;
+    /* TODO */
 }
 
 /* VCPU PV clock. */
@@ -107,37 +65,6 @@ void domain_set_time_offset(struct domain *d, int64_t time_offset_seconds)
 
 int reprogram_timer(s_time_t timeout)
 {
-    uint64_t deadline, now;
-
-    if (timeout == 0)
-    {
-        /* Disable timers */
-        csr_clear(CSR_SIE, 1ul << IRQ_S_TIMER);
-        return 1;
-    }
-    
-    deadline = ns_to_ticks(timeout) + boot_count;
-    now = get_cycles();
-    if (deadline <= now)
-        return 0;
-
-    /* Enable timer */
-    sbi_set_timer(deadline);
-    csr_set(CSR_SIE, 1ul << IRQ_S_TIMER);
-
-    return 1;
-}
-
-void timer_interrupt(unsigned long cause, struct cpu_user_regs *regs)
-{
-    /* Disable the timer to avoid more interrupts */
-    csr_clear(CSR_SIE, 1ul << IRQ_S_TIMER);
-
-    /* Signal the generic timer code to do its work */
-    raise_softirq(TIMER_SOFTIRQ);
-}
-
-/* Set up the timer interrupt on this CPU */
-void init_timer_interrupt(void)
-{
+    /* TODO */
+    return -ENOSYS;
 }
