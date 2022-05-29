@@ -5,7 +5,6 @@
 
 #include <xen/types.h>
 #include <asm/csr.h>
-#include <asm/sysregs.h>
 #include <asm/processor.h>
 
 extern char __per_cpu_start[], __per_cpu_data_end[];
