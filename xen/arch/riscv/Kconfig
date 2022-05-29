@@ -1,5 +1,7 @@
 config RISCV
 	def_bool y
+        select HAS_PDX
+        select HAS_DEVICE_TREE
 
 config RISCV_64
 	def_bool y

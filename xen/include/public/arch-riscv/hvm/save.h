@@ -1,5 +1,8 @@
-/******************************************************************************
- * protocols.h
+/*
+ * Structure definitions for HVM state that is held by Xen and must
+ * be saved along with the domain's memory and device-model state.
+ *
+ * Copyright (c) 2012 Citrix Systems Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -18,28 +21,19 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- *
- * Copyright (c) 2008, Keir Fraser
  */
 
-#ifndef __XEN_PROTOCOLS_H__
-#define __XEN_PROTOCOLS_H__
-
-#define XEN_IO_PROTO_ABI_X86_32     "x86_32-abi"
-#define XEN_IO_PROTO_ABI_X86_64     "x86_64-abi"
-#define XEN_IO_PROTO_ABI_ARM        "arm-abi"
-#define XEN_IO_PROTO_ABI_RISCV      "riscv-abi"
-
-#if defined(__i386__)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_X86_32
-#elif defined(__x86_64__)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_X86_64
-#elif defined(__arm__) || defined(__aarch64__)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_ARM
-#elif defined(__riscv)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_RISCV
-#else
-# error arch fixup needed here
-#endif
+#ifndef __XEN_PUBLIC_HVM_SAVE_RISCV_H__
+#define __XEN_PUBLIC_HVM_SAVE_RISCV_H__
 
 #endif
+
+/*
+ * Local variables:
+ * mode: C
+ * c-file-style: "BSD"
+ * c-basic-offset: 4
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */

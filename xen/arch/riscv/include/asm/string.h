@@ -1,5 +1,6 @@
 /******************************************************************************
- * protocols.h
+ *
+ * Copyright 2019 (C) Alistair Francis <alistair.francis@wdc.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -19,27 +20,9 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * Copyright (c) 2008, Keir Fraser
  */
 
-#ifndef __XEN_PROTOCOLS_H__
-#define __XEN_PROTOCOLS_H__
+#ifndef _ASM_RISCV_STRING_H
+#define _ASM_RISCV_STRING_H
 
-#define XEN_IO_PROTO_ABI_X86_32     "x86_32-abi"
-#define XEN_IO_PROTO_ABI_X86_64     "x86_64-abi"
-#define XEN_IO_PROTO_ABI_ARM        "arm-abi"
-#define XEN_IO_PROTO_ABI_RISCV      "riscv-abi"
-
-#if defined(__i386__)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_X86_32
-#elif defined(__x86_64__)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_X86_64
-#elif defined(__arm__) || defined(__aarch64__)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_ARM
-#elif defined(__riscv)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_RISCV
-#else
-# error arch fixup needed here
-#endif
-
-#endif
+#endif /* _ASM_RISCV_STRING_H */

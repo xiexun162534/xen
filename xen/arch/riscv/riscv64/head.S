@@ -1,6 +1,13 @@
+#include <asm/asm.h>
+#include <asm/asm-offsets.h>
+#include <asm/init.h>
+#include <asm/csr.h>
 #include <asm/config.h>
+#include <asm/processor.h>
 
-        .text
-
+	.section .text.header, "ax", %progbits
 ENTRY(start)
-        j  start
+_start_hang:
+	wfi
+	j	_start_hang
+ENDPROC(start)

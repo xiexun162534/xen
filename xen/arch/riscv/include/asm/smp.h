@@ -1,5 +1,6 @@
 /******************************************************************************
- * protocols.h
+ *
+ * Copyright 2019 (C) Alistair Francis <alistair.francis@wdc.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -19,27 +20,50 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  *
- * Copyright (c) 2008, Keir Fraser
  */
 
-#ifndef __XEN_PROTOCOLS_H__
-#define __XEN_PROTOCOLS_H__
+#ifndef _ASM_RISCV_SMP_H
+#define _ASM_RISCV_SMP_H
 
-#define XEN_IO_PROTO_ABI_X86_32     "x86_32-abi"
-#define XEN_IO_PROTO_ABI_X86_64     "x86_64-abi"
-#define XEN_IO_PROTO_ABI_ARM        "arm-abi"
-#define XEN_IO_PROTO_ABI_RISCV      "riscv-abi"
-
-#if defined(__i386__)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_X86_32
-#elif defined(__x86_64__)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_X86_64
-#elif defined(__arm__) || defined(__aarch64__)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_ARM
-#elif defined(__riscv)
-# define XEN_IO_PROTO_ABI_NATIVE XEN_IO_PROTO_ABI_RISCV
-#else
-# error arch fixup needed here
+#ifndef __ASSEMBLY__
+#include <xen/cpumask.h>
+#include <asm/current.h>
 #endif
 
-#endif
+DECLARE_PER_CPU(cpumask_var_t, cpu_sibling_mask);
+DECLARE_PER_CPU(cpumask_var_t, cpu_core_mask);
+
+#define HARTID_INVALID		-1
+
+/*
+ * Do we, for platform reasons, need to actually keep CPUs online when we
+ * would otherwise prefer them to be off?
+ */
+#define park_offline_cpus true
+
+#define cpu_is_offline(cpu) unlikely(!cpu_online(cpu))
+
+static inline unsigned int __raw_smp_processor_id(void)
+{
+    unsigned long id;
+
+    id = get_processor_id();
+
+    /*
+     * Technically the hartid can be greater than what a uint can hold.
+     * If such a system were to exist, we will need to change
+     * the raw_smp_processor_id() API to be unsigned long instead of
+     * unsigned int.
+     */
+    BUG_ON(id > UINT_MAX);
+
+    return (unsigned int)id;
+}
+
+#define raw_smp_processor_id() (__raw_smp_processor_id())
+#define smp_processor_id() (__raw_smp_processor_id())
+
+void smp_clear_cpu_maps (void);
+int smp_get_max_cpus(void);
+
+#endif /* _ASM_RISCV_SMP_H */
