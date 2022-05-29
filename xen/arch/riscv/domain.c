@@ -4,7 +4,6 @@
 #include <xen/sched.h>
 #include <xen/domain.h>
 #include <xen/softirq.h>
-#include <asm/vtimer.h>
 #include <asm/traps.h>
 #include <public/domctl.h>
 #include <public/xen.h>
@@ -86,23 +85,7 @@ int arch_domain_create(struct domain *d,
                        struct xen_domctl_createdomain *config,
                         unsigned int flags)
 {
-    int rc = 0;
-
-    if ( is_idle_domain(d) )
-        return 0;
-
-    if ( (rc = p2m_init(d)) != 0)
-        goto fail;
-
-    if ( (rc = domain_vtimer_init(d, &config->arch)) != 0 )
-        goto fail;
-
-    return rc;
-    
-fail:
-    d->is_dying = DOMDYING_dead;
-    arch_domain_destroy(d);
-    return rc;
+    return -ENOSYS;
 }
 
 void arch_domain_destroy(struct domain *d)

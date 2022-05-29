@@ -14,10 +14,6 @@ struct riscv_trap {
     unsigned long htinst;
 };
 
-extern unsigned long __trap_from_guest(void);
-
-#define trap_from_guest __trap_from_guest()
-
 #endif /* __ASSEMBLY__ */
 
 #define RISCV_TRAP_sepc     0

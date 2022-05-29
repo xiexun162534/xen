@@ -4,7 +4,6 @@ obj-y   += domctl.o
 obj-y   += domain.o
 obj-y   += delay.o
 obj-y   += early_printk.o
-obj-y   += entry.o
 obj-y   += guestcopy.o
 obj-y   += irq.o
 obj-y   += p2m.o
@@ -23,12 +22,10 @@ obj-y   += vplic.o
 obj-y   += device.o
 obj-y   += uart.o
 obj-y   += plic.o
-obj-y 	+= vtimer.o
 
 #obj-bin-y += ....o
 
 obj-y	+= head.o
-obj-y	+= entry.o
 
 $(TARGET): $(TARGET)-syms
 	$(OBJCOPY) -O binary -S $< $@
