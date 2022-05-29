@@ -7,7 +7,6 @@
 #include <xen/sched.h>
 #include <asm/page.h>
 #include <asm/p2m.h>
-#include <asm/vplic.h>
 #include <public/hvm/params.h>
 #include <xen/serial.h>
 #include <xen/rbtree.h>
@@ -74,7 +73,6 @@ struct arch_vcpu
 
     struct cpu_info *cpu_info;
     void *stack;
-    struct vplic *vplic;
     struct vtimer vtimer;
     bool vtimer_initialized;
 
