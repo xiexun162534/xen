@@ -8,6 +8,7 @@ obj-y   += irq.o
 obj-y   += p2m.o
 obj-y   += mm.o
 obj-y   += percpu.o
+obj-y   += sbi.o
 obj-y   += setup.o
 obj-y   += shutdown.o
 obj-y   += smp.o
