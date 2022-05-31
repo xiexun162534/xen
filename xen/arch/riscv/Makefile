@@ -3,6 +3,7 @@ obj-y += lib/
 obj-y   += domctl.o
 obj-y   += domain.o
 obj-y   += delay.o
+obj-y   += early_printk.o
 obj-y   += guestcopy.o
 obj-y   += irq.o
 obj-y   += p2m.o
